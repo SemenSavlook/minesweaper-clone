@@ -59,7 +59,7 @@ body {
 
 .board>[data-status="marked"] {
   background-color: yellow;
-  background-image: url('./naval-mine-45.svg');
+  background-image: url('./naval-mine-45-q.svg');
   background-position: center;
   opacity: .75;
 }

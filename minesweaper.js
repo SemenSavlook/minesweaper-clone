@@ -1,4 +1,4 @@
-export var TILE_STATUSES = {
+var TILE_STATUSES = {
   HIDDEN: 'hidden',
   MINE: 'mine',
   NUMBER: 'number',
@@ -37,7 +37,9 @@ function createBoard(boardSize, numberOfMines) {
 }
 
 function markTile(tile) {
-  if (tile.status !== TILE_STATUSES.HIDDEN && tile.status !== TILE_STATUSES.MARKED) {
+  if (
+    tile.status !== TILE_STATUSES.HIDDEN &&
+    tile.status !== TILE_STATUSES.MARKED) {
     return;
   }
 
@@ -73,7 +75,8 @@ function randomNumber(size) {
   return Math.floor(Math.random() * size);
 }
 
-function revealTile(tile) {
+function revealTile(board, tile) {
+
   if (tile.status !== TILE_STATUSES.HIDDEN) {
     return;
   }
@@ -84,6 +87,46 @@ function revealTile(tile) {
   }
 
   tile.status = TILE_STATUSES.NUMBER;
+  const adjacentTiles = nearbyTiles(board, tile);
+  const mines = adjacentTiles.filter(tile => tile.mine);
+  if (mines.length === 0) {
+    adjacentTiles.forEach(revealTile.bind(null, board))
+  } else {
+    tile.element.textContent = mines.length;
+  }
 }
 
-export { createBoard, markTile, revealTile };
+function nearbyTiles(board, { x, y }) {
+  const tiles = [];
+
+  for (let xOffset = -1; xOffset <= 1; xOffset++) {
+    for (let yOffset = -1; yOffset <= 1; yOffset++) {
+      const tile = board[x + xOffset]?.[y + yOffset];
+      if (tile) tiles.push(tile);
+    }
+  }
+
+  return tiles;
+}
+
+function checkWin(board) {
+  return board.every(row => {
+    return row.every(tile => {
+      return tile.status === TILE_STATUSES.NUMBER ||
+        (tile.mine &&
+          (tile.status === TILE_STATUSES.HIDDEN || tile.status === TILE_STATUSES.MARKED))
+    })
+  })
+}
+
+function checkLose(board) {
+  return board.some(row => {
+    return row.some(tile => {
+      return tile.status === TILE_STATUSES.MINE
+    })
+  })
+}
+
+
+
+export { createBoard, markTile, revealTile, TILE_STATUSES, checkWin, checkLose };
